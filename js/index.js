@@ -60,6 +60,45 @@ function showBook(book) {
     ul.append(userLi);
   });
 
+  const likeBookForm = document.createElement("form");
+  const idInput = document.createElement("input");
+  idInput.name = "id";
+  idInput.label = "id";
+  const usernameInput = document.createElement("input");
+  usernameInput.name = "username";
+  usernameInput.label = "username";
+  const submitBtn = document.createElement("input");
+  submitBtn.type = "submit";
+  likeBookForm.append(idInput, usernameInput, submitBtn);
+
+  likeBookForm.addEventListener("submit", e => {
+    e.preventDefault();
+
+    const formId = e.target.id.value;
+    const formUsername = e.target.username.value;
+
+    book.users.push({ id: formId, username: formUsername });
+
+    console.log(book);
+
+    API.patch(booksUrl, book.id, book).then(newBookData => {
+      const ul = document.querySelector("#users-list");
+      while (ul.lastChild) {
+        ul.removeChild(ul.lastChild);
+      }
+      newBookData.users.forEach(bookUser => {
+        const userLi = document.createElement("li");
+        userLi.innerText = bookUser.username;
+        userLi.id = `user-${bookUser.id}`;
+        ul.append(userLi);
+      });
+      const readBtn = document.querySelector("button");
+      !hasUserReadThisBook(book)
+        ? (readBtn.innerText = "Read Me")
+        : (readBtn.innerText = "Unread Me");
+    });
+  });
+
   const readBtn = document.createElement("button");
   readBtn.addEventListener("click", () => handleButtonClick(book));
 
@@ -69,7 +108,7 @@ function showBook(book) {
     readBtn.innerText = "Read Me";
   }
 
-  showPanel.append(h2, img, p, readBtn, ul);
+  showPanel.append(h2, img, p, readBtn, likeBookForm, ul);
 }
 
 function handleButtonClick(book) {
